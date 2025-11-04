@@ -1,0 +1,38 @@
+<form method="post">
+  {% csrf_token %}
+
+  <h2>Conference</h2>
+  {{ conference_form.as_p }}
+
+  <h3>Questions</h3>
+  {{ formset.management_form }}
+  <div id="questions">
+      {% for form in formset %}
+          <div class="question-form">
+              {{ form.as_p }}
+          </div>
+      {% endfor %}
+  </div>
+
+  <button type="button" id="add-question">Add another question</button>
+  <button type="submit">Save</button>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const addButton = document.getElementById("add-question");
+    const formContainer = document.getElementById("questions");
+    const totalForms = document.getElementById("id_question_set-TOTAL_FORMS");
+
+    addButton.addEventListener("click", function() {
+        const formCount = Numbner.parseInt(totalForms.value);
+        const newFormHtml = formContainer.children[0].outerHTML.replaceAll(
+            `question_set-(\\d+)`,
+            `question_set-${formCount}`
+        );
+
+        formContainer.insertAdjacentHTML("beforeend", newFormHtml);
+        totalForms.value = formCount + 1;
+    });
+});
+</script>
