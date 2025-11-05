@@ -1,0 +1,35 @@
+{% load lucide %}
+<div class="question-form p-3 rounded-lg border border-base-200 bg-base-200/30 flex flex-col gap-1">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 drag-handle cursor-grab text-base-content/60">
+            {% lucide "grip-vertical" size=18 %}
+            <span class="text-xs opacity-70">Question</span>
+        </div>
+        <button type="button"
+                class="delete-question btn btn-xs btn-ghost text-error flex items-center gap-1">
+            {% lucide "trash-2" size=14 class="text-error" %} Remove
+        </button>
+    </div>
+
+    {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+    {% endfor %}
+
+    {% for field in form.visible_fields %}
+        {% if field.name != "DELETE" and field.name != "ORDER" and field.name != "position" %}
+            <label class="floating-label mt-2">
+                <span class="label">{{ field.label }}</span>
+                {{ field }}
+            </label>
+            {% if field.errors %}
+                <p class="text-error text-sm mt-1">
+                    {{ field.errors|striptags }}
+                </p>
+            {% endif %}
+        {% else %}
+            <div class="hidden">
+                {{ field }}
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>

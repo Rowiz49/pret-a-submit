@@ -2,6 +2,7 @@
 {% load lucide %}
 {% block content %}
     <div class="max-w-md mx-auto mt-8 card bg-base-100 shadow-sm border border-base-200">
+        <!--Conference Selector-->
         <div class="card-body py-4">
             <h2 class="card-title text-sm font-semibold text-base-content/70">Conferences</h2>
             <form id="conference-selector"
@@ -23,12 +24,12 @@
                 <!-- Edit -->
                 <a id="edit-btn"
                    href="#"
-                   class="btn btn-ghost btn-xs tooltip tooltip-top"
+                   class="btn btn-ghost btn-xs tooltip tooltip-top, opacity-50 pointer-events-none"
                    data-tip="Edit">{% lucide "pencil" class="text-info" size=20 %}</a>
                 <!-- Delete -->
                 <a id="delete-btn"
                    href="#"
-                   class="btn btn-ghost btn-xs tooltip tooltip-top opacity-50"
+                   class="btn btn-ghost btn-xs tooltip tooltip-top opacity-50 pointer-events-none"
                    data-tip="Delete">{% lucide "trash-2" class="text-error" size=20 %}</a>
             </div>
         </div>

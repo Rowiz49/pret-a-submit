@@ -17,7 +17,7 @@ class ConferenceForm(forms.ModelForm):
 QuestionFormSet = inlineformset_factory(
     Conference,
     Question,
-    fields=["question_text"],
+    fields=["question_text", "position"],
     exclude=["id"], 
     widgets={
         "question_text": forms.Textarea(
@@ -29,5 +29,6 @@ QuestionFormSet = inlineformset_factory(
         )
     },
     extra=1,
-    can_delete=True
+    can_delete=True,
 )
+#TODO: NOT REQUIRE THE TEXTAREA IF THERE ARE ALREADY 
