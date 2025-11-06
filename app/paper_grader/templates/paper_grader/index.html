@@ -4,7 +4,9 @@
     <div class="max-w-md mx-auto mt-8 card bg-base-100 shadow-sm border border-base-200">
         <!--Conference Selector-->
         <div class="card-body py-4">
-            <h2 class="card-title text-sm font-semibold text-base-content/70">Conferences</h2>
+            <h2 class="card-title text-sm font-semibold text-base-content/70">
+                Conferences
+            </h2>
             <form id="conference-selector"
                   method="get"
                   action=""
@@ -12,10 +14,17 @@
                 <select id="conference"
                         name="conference"
                         class="select select-sm select-bordered w-full">
-                    <option value="">-- Choose a conference --</option>
-                    {% for conference in conferences %}<option value="{{ conference.id }}">{{ conference.name }}</option>{% endfor %}
+                    <option value="">
+                        -- Choose a conference --
+                    </option>
+                    {% for conference in conferences %}
+                        <option value="{{ conference.id }}">
+                            {{ conference.name }}
+                        </option>
+                    {% endfor %}
                 </select>
             </form>
+
             <div class="flex justify-end gap-2 mt-2">
                 <!-- Create -->
                 <a href="{% url 'conference_create' %}"
@@ -34,24 +43,25 @@
             </div>
         </div>
     </div>
+
     <script>
-document.addEventListener("DOMContentLoaded", () => {
-    const selector = document.getElementById("conference");
-    const editBtn = document.getElementById("edit-btn");
-    const deleteBtn = document.getElementById("delete-btn");
+        document.addEventListener("DOMContentLoaded", () => {
+            const selector = document.getElementById("conference");
+            const editBtn = document.getElementById("edit-btn");
+            const deleteBtn = document.getElementById("delete-btn");
 
-    selector.addEventListener("change", function() {
-        const id = this.value;
-        const disabled = !id;
+            selector.addEventListener("change", function() {
+                const id = this.value;
+                const disabled = !id;
 
-        editBtn.href = disabled ? "#" : `/conference/${id}/edit/`;
-        deleteBtn.href = disabled ? "#" : `/conference/${id}/delete/`;
+                editBtn.href = disabled ? "#" : `/conference/${id}/edit/`;
+                deleteBtn.href = disabled ? "#" : `/conference/${id}/delete/`;
 
-        [editBtn, deleteBtn].forEach(btn => {
-            btn.classList.toggle("opacity-50", disabled);
-            btn.classList.toggle("pointer-events-none", disabled);
+                [editBtn, deleteBtn].forEach(btn => {
+                    btn.classList.toggle("opacity-50", disabled);
+                    btn.classList.toggle("pointer-events-none", disabled);
+                });
+            });
         });
-    });
-});
     </script>
 {% endblock content %}

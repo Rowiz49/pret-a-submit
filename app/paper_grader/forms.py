@@ -1,7 +1,6 @@
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, BaseInlineFormSet
 from .models import Conference, Question
-
 
 class ConferenceForm(forms.ModelForm):
     class Meta:
@@ -12,6 +11,11 @@ class ConferenceForm(forms.ModelForm):
                 attrs={"placeholder": "Conference name"}
             ),
         }
+
+class BaseQuestionFormSet(BaseInlineFormSet):
+    default_error_messages = {
+        "too_few_forms": " Please submit at least 1 question.",
+    }
 
 
 QuestionFormSet = inlineformset_factory(
@@ -25,10 +29,13 @@ QuestionFormSet = inlineformset_factory(
                 "class": "textarea textarea-sm w-full",
                 "rows": 1,
                 "placeholder": "Enter a question...",
+                "required": False
             }
         )
     },
-    extra=1,
+    extra=0,
     can_delete=True,
+    min_num=1,
+    validate_min=True,
+    formset=BaseQuestionFormSet
 )
-#TODO: NOT REQUIRE THE TEXTAREA IF THERE ARE ALREADY 
