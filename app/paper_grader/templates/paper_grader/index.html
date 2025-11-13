@@ -19,16 +19,10 @@
                     </h2>
 
                     <div class="flex flex-col gap-2">
-                        <select id="conference" name="conference" class="select select-sm w-full">
-                            <option value="">
-                                -- Choose a conference --
-                            </option>
-                            {% for conference in conferences %}
-                                <option value="{{ conference.id }}">
-                                    {{ conference.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                        {{ form.conference }}
+                        {% if form.conference.errors %}
+                            <span class="text-error text-xs">{{ form.conference.errors.0 }}</span>
+                        {% endif %}
                     </div>
 
                     <div class="flex justify-end gap-2 mt-2">
@@ -66,35 +60,27 @@
                         <label class="label">
                             <span class="label-text text-sm text-base-content/70">Ollama URL</span>
                         </label>
-                        <input type="url"
-                               id="ollama_url"
-                               name="ollama_url"
-                               placeholder="http://localhost:11434"
-                               class="input input-sm w-full"
-                               required>
+                        {{ form.ollama_url }}
+                        {% if form.ollama_url.errors %}
+                            <span class="text-error text-xs">{{ form.ollama_url.errors.0 }}</span>
+                        {% endif %}
                     </div>
 
                     <div class="form-control mb-2">
                         <label class="label">
                             <span class="label-text text-sm text-base-content/70">Model</span>
                         </label>
-                        <input type="text"
-                               id="ollama_model"
-                               name="ollama_model"
-                               placeholder="llama3, mistral, etc."
-                               class="input input-sm w-full"
-                               required>
+                        {{ form.ollama_model }}
+                        {% if form.ollama_model.errors %}
+                            <span class="text-error text-xs">{{ form.ollama_model.errors.0 }}</span>
+                        {% endif %}
                     </div>
 
                     <fieldset class="fieldset mb-4">
                         <legend class="fieldset-legend">
                             API Key
                         </legend>
-                        <input type="password"
-                               id="ollama_api_key"
-                               name="ollama_api_key"
-                               placeholder="Optional API key"
-                               class="input input-sm w-full">
+                        {{ form.ollama_api_key }}
                         <p class="label">
                             Optional
                         </p>
@@ -112,11 +98,10 @@
 
                 <!-- File input with internal browse button -->
                 <div class="form-control relative w-full max-w-xs">
-                    <input type="file"
-                           id="file-input"
-                           name="files"
-                           accept=".pdf"
-                           class="file-input file-input-bordered w-full pr-24">
+                    {{ form.files }}
+                    {% if form.files.errors %}
+                        <span class="text-error text-xs mt-1">{{ form.files.errors.0 }}</span>
+                    {% endif %}
                     <button type="button"
                             id="browse-btn"
                             class="btn btn-sm btn-primary absolute right-1 top-1">
@@ -133,7 +118,7 @@
 
                     <!-- Skeleton placeholder -->
                     <div id="pdf-skeleton"
-                         class="h-50 w-full border border-base-200 rounded bg-base-200 animate-pulse">
+                         class="h-50 w-full border border-base-200 rounded bg-base-200">
                     </div>
 
                     <!-- PDF preview (hidden by default) -->
@@ -153,6 +138,7 @@
 
     </form>
 
+    <!-- Keep the same JavaScript -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const selector = document.getElementById("conference");
@@ -173,10 +159,7 @@
                 });
             }
 
-            // Update on change
             selector.addEventListener("change", updateConferenceButtons);
-
-            // Initialize buttons on page load
             updateConferenceButtons();
 
             // ---- File Preview Logic ----
@@ -186,7 +169,6 @@
             const pdfPreview = document.getElementById("pdf-preview");
             const pdfSkeleton = document.getElementById("pdf-skeleton");
 
-            // Function to update preview
             function updateFilePreview() {
                 const file = fileInput.files[0];
 
@@ -212,16 +194,10 @@
                 }
             }
 
-            // Trigger file input on custom button
             browseBtn.addEventListener("click", () => fileInput.click());
-
-            // Update preview on file selection
             fileInput.addEventListener("change", updateFilePreview);
-
-            // Initialize preview if a file is already present
             updateFilePreview();
         });
     </script>
-
 
 {% endblock content %}
