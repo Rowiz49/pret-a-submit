@@ -26,7 +26,7 @@ class IndexView(View):
             client = ollama.Client(
                 host=ollama_url
             )
-        
+
         # Classes for json format enforcment
         class Rating(BaseModel):
             position: int
@@ -41,7 +41,7 @@ class IndexView(View):
         for question in conference.question_set.all():
             message += f'{question.position}. {question.question_text}\n'
         message += 'Following these guidelines, evaluate each question for the following paper, you may answer with yes, partial, no and NA if not applicable. Add an explanation of your answer to each question.\n'
-        message += f'You must answer in json format, following the provided template: {str(RatingList.model_json_schema())}\n'
+        message += f'You must answer in json format, following the provided template: {str(RatingList.model_json_schema())}. Make sure your output is a valid json and do not use any special characters that may break the json. \n'
         message += f'Here is the paper you must rate in markdown format: {paper_text}'
         
         content = client.chat(
@@ -49,7 +49,6 @@ class IndexView(View):
             messages=[{'role':'user', 'content':message}],
             format=RatingList.model_json_schema()        
             ).message.content
-
         return content
 
 
@@ -78,6 +77,16 @@ class IndexView(View):
             )
 
             try:
+                # Remove all wrapping content that the llm may have generated
+                start = llm_response.find('[')
+                end = llm_response.rfind(']')
+
+                if start == -1 or end == -1 or start >= end:
+                    raise json.JSONDecodeError("No valid JSON array found in input")
+
+                # Extract the JSON content
+                llm_response = llm_response[start:end + 1]
+
                 # Parse the JSON string
                 ratings_data = json.loads(llm_response)
                 
