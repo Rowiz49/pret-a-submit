@@ -6,6 +6,9 @@ import pymupdf.layout
 from django.views import View
 import ollama
 import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+import requests
 
 class IndexView(View):
     template_name = "paper_grader/index.html"
@@ -108,6 +111,41 @@ class IndexView(View):
         
             # If form is not valid, re-render the form with errors
             return render(request, 'paper_grader/index.html', {'form': form})
-       
+
+
+
+@require_http_methods(["GET"])
+def ollama_models_proxy_view(request):
+    """Proxy endpoint to fetch Ollama models and avoid CORS issues"""
+    ollama_url = request.GET.get('url', '').strip().rstrip('/')
+    
+    if not ollama_url:
+        return JsonResponse({'error': 'URL parameter is required'}, status=400)
+    
+    try:
+        # Make request to Ollama API
+        response = requests.get(
+            f"{ollama_url}/api/tags",
+            timeout=10
+        )
+        response.raise_for_status()
+        
+        # Return the JSON response
+        return JsonResponse(response.json(), safe=False)
+    
+    except requests.exceptions.Timeout:
+        return JsonResponse({'error': 'Request timeout'}, status=504)
+    
+    except requests.exceptions.ConnectionError:
+        return JsonResponse({'error': 'Cannot connect to Ollama server'}, status=503)
+    
+    except requests.exceptions.HTTPError as e:
+        return JsonResponse({'error': f'HTTP {e.response.status_code}'}, status=e.response.status_code)
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+    
 
 

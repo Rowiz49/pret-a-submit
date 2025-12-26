@@ -20,6 +20,7 @@ from django.conf import settings
 
 urlpatterns = [
     path("", views.IndexView.as_view(), name="index"),
+    path('api/ollama/models/', views.ollama_models_proxy_view, name='ollama_models_proxy'),
     path("conferences/new/", views.ConferenceCreateView.as_view(), name="conference_create"),
     path("conference/<int:conference_id>/edit/", views.ConferenceUpdateView.as_view(), name="conference_update"),
     path("conference/<int:conference_id>/delete/", views.conference_delete, name="conference_delete")

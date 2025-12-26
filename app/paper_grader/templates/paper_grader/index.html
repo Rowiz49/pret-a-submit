@@ -186,10 +186,8 @@
             function updateConferenceButtons() {
                 const id = selector.value;
                 const disabled = !id;
-
                 editBtn.href = disabled ? "#" : `/conference/${id}/edit/`;
                 deleteBtn.href = disabled ? "#" : `/conference/${id}/delete/`;
-
                 [editBtn, deleteBtn].forEach(btn => {
                     btn.classList.toggle("opacity-50", disabled);
                     btn.classList.toggle("pointer-events-none", disabled);
@@ -198,6 +196,140 @@
 
             selector.addEventListener("change", updateConferenceButtons);
             updateConferenceButtons();
+
+            // ---- LLM Model Autocomplete Logic ----
+            const ollamaUrl = document.getElementById("ollama_url");
+            const ollamaModel = document.getElementById("ollama_model");
+            let availableModels = [];
+            let autocompleteList = null;
+
+            function createAutocompleteDropdown() {
+                if (autocompleteList) return;
+                autocompleteList = document.createElement("ul");
+                autocompleteList.className = "menu rounded-b bg-base-200 mt-1 shadow-lg absolute z-10 w-full max-h-26 block overflow-y-auto hidden";
+                ollamaModel.parentElement.style.position = "relative";
+                ollamaModel.parentElement.appendChild(autocompleteList);
+            }
+
+            function updateDropdown(html) {
+                if (!autocompleteList) createAutocompleteDropdown();
+                autocompleteList.innerHTML = html;
+                autocompleteList.classList.remove("hidden");
+            }
+
+            function normalizeUrl(url) {
+                return url.trim().replace(/\/+$/, '');
+            }
+
+            async function fetchOllamaModels() {
+                const url = normalizeUrl(ollamaUrl.value);
+                if (!url) return updateDropdown('<li class="disabled"><a class="text-xs text-error py-1">Enter Ollama URL first</a></li>');
+
+                updateDropdown('<li class="disabled"><a class="flex items-center gap-2 py-1"><span class="loading loading-spinner loading-xs"></span><span class="text-xs">Loading...</span></a></li>');
+
+                try {
+                    // Use Django proxy to avoid CORS issues
+                    const response = await fetch(`/api/ollama/models/?url=${encodeURIComponent(url)}`);
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    availableModels = data.models?.map(m => m.name) || [];
+
+                    if (availableModels.length === 0) {
+                        updateDropdown('<li class="disabled"><a class="text-xs text-base-content/50 py-1">No models found</a></li>');
+                    } else {
+                        filterAndShowModels(ollamaModel.value);
+                    }
+                } catch (error) {
+                    updateDropdown(`<li class="disabled"><a class="text-xs text-error py-1">Error: ${error.message}</a></li>`);
+                    setTimeout(() => autocompleteList?.classList.add("hidden"), 3000);
+                }
+            }
+
+            function filterAndShowModels(searchTerm) {
+                const filtered = availableModels.filter(m => m.toLowerCase().includes(searchTerm.toLowerCase()));
+
+                if (filtered.length === 0) {
+                    updateDropdown('<li class="disabled"><a class="text-xs text-base-content/50 py-1">No matches</a></li>');
+                } else {
+                    updateDropdown(filtered.map(m => `<li><a class="text-xs py-1 hover:bg-base-100" data-model="${m}">${m}</a></li>`).join(''));
+                    autocompleteList.querySelectorAll('a[data-model]').forEach(item => {
+                        item.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            ollamaModel.value = item.dataset.model;
+                            autocompleteList.classList.add("hidden");
+                        });
+                    });
+                }
+            }
+
+            ollamaModel.addEventListener('focus', () => {
+                availableModels.length === 0 ? fetchOllamaModels() : filterAndShowModels(ollamaModel.value);
+            });
+
+            ollamaModel.addEventListener('input', () => {
+                if (availableModels.length > 0) filterAndShowModels(ollamaModel.value);
+            });
+
+            ollamaUrl.addEventListener('blur', () => {
+                const url = normalizeUrl(ollamaUrl.value);
+                if (url && url !== ollamaUrl.dataset.lastUrl) {
+                    ollamaUrl.dataset.lastUrl = url;
+                    availableModels = [];
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (autocompleteList && !ollamaModel.contains(e.target) && !autocompleteList.contains(e.target)) {
+                    autocompleteList.classList.add("hidden");
+                }
+            });
+
+            let selectedIndex = -1;
+
+            function selectItem(index) {
+                const items = autocompleteList.querySelectorAll('li:not(.disabled) a');
+                items.forEach((item, i) => {
+                    item.classList.toggle('bg-base-100', i === index);
+                });
+                selectedIndex = index;
+                // Scroll selected item into view
+                if (index >= 0 && items[index]) {
+                    items[index].scrollIntoView({
+                        block: 'nearest',
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            ollamaModel.addEventListener('keydown', (e) => {
+                if (!autocompleteList || autocompleteList.classList.contains('hidden')) return;
+
+                const items = autocompleteList.querySelectorAll('li:not(.disabled) a');
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = selectedIndex < items.length - 1 ? selectedIndex + 1 : 0;
+                    selectItem(selectedIndex);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = selectedIndex > 0 ? selectedIndex - 1 : items.length - 1;
+                    selectItem(selectedIndex);
+                } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    ollamaModel.value = items[selectedIndex].dataset.model;
+                    autocompleteList.classList.add("hidden");
+                    selectedIndex = -1;
+                } else if (e.key === 'Escape') {
+                    autocompleteList.classList.add("hidden");
+                    selectedIndex = -1;
+                }
+            });
+
+            createAutocompleteDropdown();
 
             // ---- File Preview Logic ----
             const fileInput = document.getElementById("file-input");
@@ -208,7 +340,6 @@
 
             function updateFilePreview() {
                 const file = fileInput.files[0];
-
                 if (!file) {
                     fileName.textContent = "No file selected";
                     pdfPreview.classList.add("hidden");
@@ -218,10 +349,8 @@
                 }
 
                 fileName.textContent = file.name;
-
                 if (file.type === "application/pdf") {
-                    const url = URL.createObjectURL(file);
-                    pdfPreview.src = url;
+                    pdfPreview.src = URL.createObjectURL(file);
                     pdfPreview.classList.remove("hidden");
                     pdfSkeleton.classList.add("hidden");
                 } else {
@@ -237,19 +366,9 @@
 
             // ---- Form Submission with Loading Overlay ----
             mainForm.addEventListener("submit", (e) => {
-                // Validate form has required data
-                const conference = selector.value;
-                const file = fileInput.files[0];
-
-                if (!conference || !file) {
-                    return; // Let default validation handle it
-                }
-
-                // Show loading overlay
+                if (!selector.value || !fileInput.files[0]) return;
                 loadingOverlay.classList.remove("hidden");
                 loadingOverlay.classList.add("flex");
-
-                // Disable submit button
                 submitBtn.disabled = true;
                 submitBtn.classList.add("loading");
             });
