@@ -12,9 +12,15 @@
                 Back to Upload
             </a>
         </div>
-        <div class="card bg-base-100 shadow-sm border border-base-200 mb-8">
-            <div class="card-body max-h-300">
-                <canvas id="doughnut-chart"></canvas>
+        <div class="card bg-base-100 shadow-sm border border-base-200 mb-8 ">
+            <div class="card-body">
+                <h2 class="card-title text-lg font-semibold text-base-content/70 flex items-center gap-2 mb-4">
+                    {% lucide "chart-pie" %} Results
+                </h2>
+                <canvas id="doughnut-chart"
+                        class="max-h-100"
+                        aria-label="Distribution of answers chart">
+                </canvas>
             </div>
         </div>
 
@@ -138,37 +144,47 @@
     {{ ratings|json_script:"ratings-json" }}
     <script>
         const ratingsJson = JSON.parse(document.getElementById('ratings-json').textContent);
-        console.log(ratingsJson);
+        const checkIsDarkSchemePreferred = () => globalThis?.matchMedia?.('(prefers-color-scheme:dark)')?.matches ?? false;
 
-        (async function() {
-            // Count ratings by type
-            const countByRating = (ratingType) =>
-                ratingsJson.filter(r => r.rating.toUpperCase() === ratingType).length;
+        // Count ratings by type
+        const countByRating = (ratingType) =>
+            ratingsJson.filter(r => r.rating.toUpperCase() === ratingType).length;
 
-            new Chart(
-                document.getElementById('doughnut-chart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['NA', 'No', 'Partial', 'Yes'],
-                        datasets: [{
-                            label: 'Distribution of Answers',
-                            data: [
-                                countByRating('NA'),
-                                countByRating('NO'),
-                                countByRating('PARTIAL'),
-                                countByRating('YES')
-                            ],
-                            backgroundColor: [
-                                'rgb(152, 178, 200)',
-                                'rgb(255, 187, 189)',
-                                'rgb(222, 185, 136)',
-                                'rgb(145, 189, 148)'
-                            ],
-                            hoverOffset: 4
-                        }]
+        const isDark = checkIsDarkSchemePreferred();
+
+        new Chart(
+            document.getElementById('doughnut-chart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Yes', 'Partial', 'No', 'NA'],
+                    datasets: [{
+                        label: 'Number of Answers',
+                        data: [
+                            countByRating('YES'),
+                            countByRating('PARTIAL'),
+                            countByRating('NO'),
+                            countByRating('NA')
+
+                        ],
+                        backgroundColor: [
+                            'rgb(76, 209, 82)',
+                            'rgb(255, 159, 28)',
+                            'rgb(255, 77, 82)',
+                            'rgb(145, 145, 145)'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isDark ? '#FFFFFF' : '#000000'
+                            }
+                        }
                     }
                 }
-            );
-        })();
+            }
+        );
     </script>
 {% endblock content %}
