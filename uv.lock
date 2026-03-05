@@ -1065,7 +1065,7 @@ wheels = [
 ]
 
 [[package]]
-name = "tfg-conference-paper-rater"
+name = "pret-a-submit"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

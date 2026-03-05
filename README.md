@@ -1,4 +1,4 @@
-Prêt-á-Submit is a tool that allows researchers to use their own local LLMs to review their papers against conference's checklists. Each question is answered with **Yes / Partial / No / NA**, accompanied by an explanation — giving reviewers a structured, consistent first-pass assessment.
+Prêt-à-Submit is a tool that allows researchers to use their own local LLMs to review their papers against conference's checklists. Each question is answered with **Yes / Partial / No / NA**, accompanied by an explanation — giving reviewers a structured, consistent first-pass assessment.
 
 ![Python](https://img.shields.io/badge/Python-3.12+-blue?logo=python) ![Django](https://img.shields.io/badge/Django-6.x-green?logo=django) ![License](https://img.shields.io/badge/License-GPL--3.0-blue)
 
@@ -16,14 +16,14 @@ Prêt-á-Submit is a tool that allows researchers to use their own local LLMs to
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Backend | Django 5, Python 3.12 |
-| LLM client | [Ollama Python](https://github.com/ollama/ollama-python) |
-| PDF parsing | [pymupdf4llm](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/) |
-| Frontend | TailwindCSS v4, DaisyUI |
-| Charts | Chart.js |
-| Containerisation | Docker |
+| Layer            | Technology                                                           |
+| ---------------- | -------------------------------------------------------------------- |
+| Backend          | Django 5, Python 3.12                                                |
+| LLM client       | [Ollama Python](https://github.com/ollama/ollama-python)             |
+| PDF parsing      | [pymupdf4llm](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/) |
+| Frontend         | TailwindCSS v4, DaisyUI                                              |
+| Charts           | Chart.js                                                             |
+| Containerisation | Docker                                                               |
 
 ---
 
@@ -40,10 +40,10 @@ Prêt-á-Submit is a tool that allows researchers to use their own local LLMs to
 
 ```bash
 # Build the image
-docker build -t conference-paper-grader .
+docker build -t pret-a-submit .
 
 # Run (host network is required to reach a local Ollama instance)
-docker run --network=host conference-paper-grader
+docker run --network=host pret-a-submit
 ```
 
 The app will be available at `http://localhost:8965`.
