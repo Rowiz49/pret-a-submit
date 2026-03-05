@@ -1,4 +1,4 @@
-Conference Paper Grader allows researchers to use their own local LLMs to review their papers against conference's checklists. Each question is answered with **Yes / Partial / No / NA**, accompanied by an explanation — giving reviewers a structured, consistent first-pass assessment.
+Prêt-á-Submit is a tool that allows researchers to use their own local LLMs to review their papers against conference's checklists. Each question is answered with **Yes / Partial / No / NA**, accompanied by an explanation — giving reviewers a structured, consistent first-pass assessment.
 
 ![Python](https://img.shields.io/badge/Python-3.12+-blue?logo=python) ![Django](https://img.shields.io/badge/Django-6.x-green?logo=django) ![License](https://img.shields.io/badge/License-GPL--3.0-blue)
 
