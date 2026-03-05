@@ -38,12 +38,18 @@ Prêt-à-Submit is a tool that allows researchers to use their own local LLMs to
 
 ### With Docker (recommended)
 
+You may build it locally
 ```bash
 # Build the image
 docker build -t pret-a-submit .
 
 # Run (host network is required to reach a local Ollama instance)
 docker run --network=host pret-a-submit
+```
+or pull from the repository
+```bash
+# Run (host network is required to reach a local Ollama instance)
+docker run --network=host ghcr.io/rowiz49/conference_paper_grader:latest 
 ```
 
 The app will be available at `http://localhost:8965`.
