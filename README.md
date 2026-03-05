@@ -49,7 +49,7 @@ docker run --network=host pret-a-submit
 or pull from the repository
 ```bash
 # Run (host network is required to reach a local Ollama instance)
-docker run --network=host ghcr.io/rowiz49/conference_paper_grader:latest 
+docker run --network=host ghcr.io/rowiz49/pret-a-submit:latest
 ```
 
 The app will be available at `http://localhost:8965`.
