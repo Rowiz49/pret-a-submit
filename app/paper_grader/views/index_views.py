@@ -168,7 +168,7 @@ def ollama_models_proxy_view(request):
     except requests.exceptions.HTTPError as e:
         return JsonResponse({'error': f'HTTP {e.response.status_code}'}, status=e.response.status_code)
     
-    except Exception as e:
+    except Exception:
         logger.exception("Unexpected error in ollama_models_proxy_view")
         return JsonResponse({'error': 'Internal server error'}, status=500)
 
