@@ -30,7 +30,7 @@ Prêt-à-Submit is a tool that allows researchers to use their own local LLMs to
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) **or** Python 3.12+ with [uv](https://github.com/astral-sh/uv)
-- A running [Ollama](https://ollama.com) instance with at least one model pulled (e.g. `ollama pull llama3`), for better results we recommend using a model with a large context length (around 64K tokens or more, depending on the length of the paper), to change the context length of the [Ollama](https://ollama.com) server check the documentation [here](https://docs.ollama.com/context-length).
+- A running [Ollama](https://ollama.com) instance with at least one model pulled (e.g. `ollama pull llama3`). For better results we recommend using a model with a large context length, around 64K tokens or more, depending on the length of the paper. To change the context length of the [Ollama](https://ollama.com) server check the documentation [here](https://docs.ollama.com/context-length).
 
 ---
 
