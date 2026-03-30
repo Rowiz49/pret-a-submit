@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 import requests
 import logging
+from difflib import SequenceMatcher
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,11 @@ class IndexView(View):
         return render(request, self.template_name, {
         'form': form,
         })
+
+
+    def are_similar(self, a, b, threshold=0.9): #We use 0.9 as a sane default to get changes more significant than punctuation
+        return SequenceMatcher(None, a.lower(), b.lower()).ratio() >= threshold
+
 
     def llm_processing(self, conference, ollama_url, ollama_model, ollama_api_key, paper_text):
         if ollama_api_key:  
@@ -58,6 +64,26 @@ class IndexView(View):
         return content
 
 
+    def parse_results(self, llm_response, conference):
+        
+        # Remove all wrapping content that the llm may have generated
+        start = llm_response.find('[')
+        end = llm_response.rfind(']')
+        
+        if start == -1 or end == -1 or start >= end:
+            raise json.JSONDecodeError("No valid JSON array found in input", "", 0)
+        
+        # Extract the JSON content
+        llm_response = llm_response[start:end + 1]
+        
+        # Parse the JSON string
+        ratings_data = json.loads(llm_response)
+        
+        # Sort by position to ensure correct order
+        ratings_data.sort(key=lambda x: x.get('position', 0))
+        
+        return ratings_data
+
     def post(self, request):
         form = PaperUploadForm(request.POST, request.FILES)
         result_template = 'paper_grader/results.html'
@@ -83,39 +109,25 @@ class IndexView(View):
                     ollama_api_key, 
                     md_text
                 )
+                ratings_data = self.parse_results(llm_response, conference)
 
-                # Remove all wrapping content that the llm may have generated
-                start = llm_response.find('[')
-                end = llm_response.rfind(']')
-
-                if start == -1 or end == -1 or start >= end:
-                    raise json.JSONDecodeError("No valid JSON array found in input", "", 0)
-
-                # Extract the JSON content
-                llm_response = llm_response[start:end + 1]
-
-                # Parse the JSON string
-                ratings_data = json.loads(llm_response)
-                
-                # Sort by position to ensure correct order
-                ratings_data.sort(key=lambda x: x.get('position', 0))
-                
                 # Build lookup: position -> actual question text
                 actual_questions = {
                     q.position: q.question_text 
                     for q in conference.question_set.all()
                 }
-
+                
                 for rating in ratings_data:
                     pos = rating.get('position')
                     actual = actual_questions.get(pos, '')
                     llm_question = rating.get('question', '').strip()
-                    if actual and llm_question != actual.strip():
+
+                    if actual and not self.are_similar(llm_question, actual.strip()):
                         rating['question_mismatch'] = True
                         rating['actual_question'] = actual
                     else:
                         rating['question_mismatch'] = False
-                        rating['actual_question'] = actual  # pass through for clarity
+                        rating['actual_question'] = actual
 
                 return render(request, result_template, {
                     "ratings": ratings_data,
